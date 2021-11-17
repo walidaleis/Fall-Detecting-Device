@@ -11,6 +11,7 @@
 *******************************************************************************
 */
 #include <M5Core2.h>
+#include <M5Stack.h>
 #include <math.h> //library in place of cmath
 #define SHORT_PRESS_TIME 10 //Defines the length of a tap on the screen 
 
@@ -58,7 +59,7 @@ void loop() {
 //      Button B(200, 140, 80, 80, false ,"No", off_clrs, on_clrs, MC_DATUM);
 
       M5.update();
-      if (M5.BtnA.wasPressed()) {
+      if (M5.BtnA.wasReleased()){
       M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.  
          M5.Lcd.setCursor(15, 30);
       M5.Lcd.printf("You are okay");
@@ -68,7 +69,7 @@ void loop() {
             
         //initate imPACT concussion test
      M5.update();
-     if (M5.BtnB.wasPressed()) {
+  if (M5.BtnB.wasReleased()){
          //send emergecy contact message
            M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.  
               M5.Lcd.setCursor(15, 30);
