@@ -17,7 +17,7 @@
 void DisplayInit(void){ // Initialize the display. 
   M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.  
   M5.Lcd.setTextColor(BLACK); //Set the text color to black.  
-  M5.Lcd.setTextSize(0.5);  //Set font size to 2.  
+  M5.Lcd.setTextSize(1);  //Set font size to 1.  
   
 }
 
@@ -40,7 +40,7 @@ void loop() {
 //  M5.IMU.getAhrsData(&pitch,&roll,&yaw);  //Stores the inertial sensor attitude and retrieves data on angle but not needed for this rudimentary program
 
 
-    float acc = sqrt(pow(accX,2) + pow(accY,2) + pow(accZ,2)); //Computes magnitude of acceleration
+     acc = sqrt(pow(accX,2) + pow(accY,2) + pow(accZ,2)); //Computes magnitude of acceleration
 
     //Check fall condition and call mechanism if condition met
     if (acc>=2.4) {
@@ -58,16 +58,20 @@ void loop() {
       Button B(200, 140, 80, 80, false ,"No", off_clrs, on_clrs, MC_DATUM);
 
       if (A.longPressTime >= SHORT_PRESS_TIME) {
+        M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.  
          M5.Lcd.setCursor(15, 30);
       M5.Lcd.printf("You are okay");
+      delay(5000);
         M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.  
       }
             
         //initate imPACT concussion test
       if (B.longPressTime >= SHORT_PRESS_TIME) {
          //send emergecy contact message
+           M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.  
               M5.Lcd.setCursor(15, 30);
               M5.Lcd.printf("you are not okay");
+                    delay(5000);
               M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.  
       }
     
