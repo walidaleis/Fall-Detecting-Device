@@ -57,8 +57,9 @@ void loop() {
 //      Button A(40,  140, 80, 80, false ,"Yes", off_clrs, on_clrs, MC_DATUM);
 //      Button B(200, 140, 80, 80, false ,"No", off_clrs, on_clrs, MC_DATUM);
 
-      if (M5.BtnA.wasReleased() || M5.BtnA.pressedFor(1000, 200)) {
-        M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.  
+      M5.update();
+      if (M5.BtnA.wasPressed()) {
+      M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.  
          M5.Lcd.setCursor(15, 30);
       M5.Lcd.printf("You are okay");
       delay(5000);
@@ -66,7 +67,8 @@ void loop() {
       }
             
         //initate imPACT concussion test
-      if (M5.BtnC.wasReleased() || M5.BtnC.pressedFor(1000, 200)) {
+     M5.update();
+     if (M5.BtnB.wasPressed()) {
          //send emergecy contact message
            M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.  
               M5.Lcd.setCursor(15, 30);
