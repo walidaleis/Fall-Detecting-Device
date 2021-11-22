@@ -58,6 +58,8 @@ void loop() {
 //      Button A(40,  140, 80, 80, false ,"Yes", off_clrs, on_clrs, MC_DATUM);
 //      Button B(200, 140, 80, 80, false ,"No", off_clrs, on_clrs, MC_DATUM);
 
+     // while(!M5.BtnB.read() || !M5.BtnA.read()) //FIRAS ADDED THIS HERE (NEW NEW NEW NEW NEW)
+      {
       M5.update();
       if (M5.BtnA.read()){
       M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.  
@@ -65,7 +67,7 @@ void loop() {
       M5.Lcd.printf("You are okay");
       delay(5000);
         M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.  
-      }
+                          }
             
         //initate imPACT concussion test
      M5.update();
@@ -76,6 +78,7 @@ void loop() {
               M5.Lcd.printf("you are not okay");
                     delay(5000);
               M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.  
+                          }
       }
     
       for (int i=0; i<5; i++) { //for loop repeats 5 times to vibrate every 5 seconds until 20 seconds have passed
