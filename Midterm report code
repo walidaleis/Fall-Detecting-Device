@@ -11,7 +11,6 @@
 *******************************************************************************
 */
 #include <M5Core2.h>
-#include <M5Stack.h>
 #include <math.h> //library in place of cmath
 #define SHORT_PRESS_TIME 10 //Defines the length of a tap on the screen 
 
@@ -34,57 +33,77 @@ void setup() {
 The loop() function is an infinite loop in which the program runs repeatedly
 */
 void loop() {
+    M5.update();
   float acc, accX, accY, accZ; //Define variables for acceleration
    M5.Lcd.setTextColor(BLACK); //Set the font color
     M5.Lcd.setTextSize(0.5);  //Set the font size.  
   M5.IMU.getAccelData(&accX,&accY,&accZ); //Stores the triaxial accelerometer and retrieves data  
 //  M5.IMU.getAhrsData(&pitch,&roll,&yaw);  //Stores the inertial sensor attitude and retrieves data on angle but not needed for this rudimentary program
 
-
+     bool flag1 = false; //flag might be unnecessary, condition can just be acc
      acc = sqrt(pow(accX,2) + pow(accY,2) + pow(accZ,2)); //Computes magnitude of acceleration
 
     //Check fall condition and call mechanism if condition met
-    if (acc>=2.4) {
+    if (acc>=6.0) {
 
       M5.Lcd.setCursor(10, 10); //Specify where to print on screen
       M5.Lcd.printf("Suspected Fall, are you ok?"); //Check if user is okay
       M5.Lcd.setCursor(10, 26); //Move cursor to line below
       M5.Lcd.printf("Press the appropriate button"); //
-      
-      
+      flag1 = true;
+
+    }
       //Create buttons and set colors of buttons in the format {fill, boundary, text}
 //      ButtonColors on_clrs  = {BLACK, WHITE, WHITE};
 //      ButtonColors off_clrs = {BLACK, WHITE, WHITE};
 //      Button A(40,  140, 80, 80, false ,"Yes", off_clrs, on_clrs, MC_DATUM);
 //      Button B(200, 140, 80, 80, false ,"No", off_clrs, on_clrs, MC_DATUM);
 
-     // while(!M5.BtnB.read() || !M5.BtnA.read()) //FIRAS ADDED THIS HERE (NEW NEW NEW NEW NEW)
-      {
-      M5.update();
-      if (M5.BtnA.read()){
-      M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.  
+if (flag1 == true)
+
+{
+   while(!M5.BtnB.read() || !M5.BtnA.read()) {
+
+        M5.Axp.SetLDOEnable(3,true);  //Open the vibration.  
+        delay(100);
+        M5.Axp.SetLDOEnable(3,false);
+    
+        M5.update();
+        if (M5.BtnA.read()) {
+//      if (M5.BtnA.wasReleased() || M5.BtnA.pressedFor(1000, 200)) {
+        M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.  
          M5.Lcd.setCursor(15, 30);
       M5.Lcd.printf("You are okay");
       delay(5000);
-        M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.  
-                          }
+        M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.
+        break;
+      }
+   
             
         //initate imPACT concussion test
-     M5.update();
-      if (M5.BtnB.read()){
+//        if (acc>=4.0)
+//      if (M5.BtnC.wasReleased() || M5.BtnC.pressedFor(1000, 200)) {
+        M5.update();
+        if (M5.BtnC.read()) {
          //send emergecy contact message
            M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.  
               M5.Lcd.setCursor(15, 30);
               M5.Lcd.printf("you are not okay");
                     delay(5000);
-              M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.  
-                          }
+              M5.Lcd.fillScreen(WHITE); //Set the screen background color to white. 
+              break; 
       }
+      
+   }
+
+flag1 = false; //!!!
+
+}
     
-      for (int i=0; i<5; i++) { //for loop repeats 5 times to vibrate every 5 seconds until 20 seconds have passed
-          M5.Axp.SetLDOEnable(3,true);  //Open the vibration.  
-          delay(100);
-          M5.Axp.SetLDOEnable(3,false);
+//      for (int i=0; i<5; i++) { //for loop repeats 5 times to vibrate every 5 seconds until 20 seconds have passed
+//          M5.Axp.SetLDOEnable(3,true);  //Open the vibration.  
+//          delay(100);
+//          M5.Axp.SetLDOEnable(3,false);
           
 //          M5.Lcd.printf("Suspected Fall, are you ok?");
 //          M5.Lcd.setcursor(10, 26);
@@ -93,10 +112,10 @@ void loop() {
 //          if(pos.y > 240||(pos.x < 109)
 //            break;
 //          // else send emergency contact message
-          delay(5000); //Wait 5 seconds before incrementing i and repeating the for loop
+      //    delay(5000); //Wait 5 seconds before incrementing i and repeating the for loop
           }
-    }
-  
-   delay(10);
-
-       }    
+//    }
+//  
+//   delay(10);
+//
+//       }    
