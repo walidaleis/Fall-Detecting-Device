@@ -33,22 +33,22 @@ void setup() {
        i=0;
       }      
      delay(1000);
-     M5.Lcd.setTextSize(30);  
+     M5.Lcd.setTextSize(16);  
   M5.Lcd.setTextColor(WHITE); //Set the text color to black.  
   M5.Lcd.setCursor(40,29);
   M5.Lcd.printf("Fall Detection");
 delay(5000);
-  M5.Lcd.setTextSize(16);  . 
+  M5.Lcd.setTextSize(4);  . 
   M5.Lcd.setTextColor(WHITE); //Set the text color to black.  
   M5.Lcd.setCursor(0,200);
   M5.Lcd.printf("Prepare to begin concussion test to intiate baseline score");
 delay(5000)l
-  M5.Lcd.setTextSize(16);  . 
+  M5.Lcd.setTextSize(4);  . 
   M5.Lcd.setTextColor(WHITE); //Set the text color to black.  
   M5.Lcd.setCursor(0,222);
   M5.Lcd.printf("Please sit in a quiet environment to maximize accuracy");
 delay (7000);
-  M5.Lcd.setTextSize(10);  . 
+  M5.Lcd.setTextSize(2);  . 
   M5.Lcd.setTextColor(WHITE); //Set the text color to black.  
   M5.Lcd.setCursor(250,208);
   M5.Lcd.printf("Press the right button to commence");
