@@ -180,7 +180,6 @@ TimeStruct.Hours   = 0;    //Set the specific time of the real-time clock struct
   TimeStruct.Seconds = 0;
   M5.Rtc.SetTime(&TimeStruct);
 
-TimeStruct.Seconds
    while(!M5.BtnC.read() || !M5.BtnA.read()) {
    
          M5.Rtc.GetTime(&TimeStruct)
