@@ -5,7 +5,7 @@
 int count = 0;
 
 void DisplayInit(void){ // Initialize the display. 
-  M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.  
+  M5.Lcd.fillScreen(BLUE); //Set the screen background color to white.  
   M5.Lcd.setTextColor(BLACK); //Set the text color to black.  
 }
 
@@ -17,34 +17,48 @@ void setup() {
   M5.IMU.Init();  //Init IMU sensor.  初始化惯性传感器 
   DisplayInit();
   delay(100);
+  
+  //0xfd79, 0xe8e4, 0xfbe4, 0xff80, 0x2589, 0x51d, 0x3a59, 0xa254, 0x7bef, 0xffff
  int i=0;
- int color[]={
- 0xfd79, 0xe8e4, 0xfbe4, 0xff80, 0x2589, 0x51d, 0x3a59, 0xa254, 0x7bef, 0xffff}; 
+ int color[]={ 
+#020d14,#051c2b, #072b42, #0a3a59, #0d4970, #0f5887, #12679e, 0x51d, 0x3a59 
+}; 
  //Main Page
+ 
  void loop{
-    M5.Lcd.fillCircle(160, 120, 100, color [i]);
+    M5.Lcd.fillCircle(180, 140, 100, color [i]);
     i++;
     if (i >=(sizeof(color) / sizeof(int)))
       {
        i=0;
       }      
-     delay(2000);
-     }
-M5.Lcd.setTextSize(30);  
+     delay(1000);
+     M5.Lcd.setTextSize(30);  
   M5.Lcd.setTextColor(WHITE); //Set the text color to black.  
   M5.Lcd.setCursor(40,29);
-M5.Lcd.printf("Fall Detection");
-M5.Lcd.drawLine(119, 90, 189, 90, WHITE)
-    delay(5000);
+  M5.Lcd.printf("Fall Detection");
+delay(5000);
   M5.Lcd.setTextSize(16);  . 
   M5.Lcd.setTextColor(WHITE); //Set the text color to black.  
   M5.Lcd.setCursor(0,200);
-M5.Lcd.printf("Prepare to begin concussion test to intiate baseline score");
-delay(5000)
-M5.Lcd.setTextSize(16);  . 
+  M5.Lcd.printf("Prepare to begin concussion test to intiate baseline score");
+delay(5000)l
+  M5.Lcd.setTextSize(16);  . 
   M5.Lcd.setTextColor(WHITE); //Set the text color to black.  
   M5.Lcd.setCursor(0,222);
-M5.Lcd.printf("Please sit in a quiet environment to maximize accuracy");
+  M5.Lcd.printf("Please sit in a quiet environment to maximize accuracy");
+delay (7000);
+  M5.Lcd.setTextSize(10);  . 
+  M5.Lcd.setTextColor(WHITE); //Set the text color to black.  
+  M5.Lcd.setCursor(250,208);
+  M5.Lcd.printf("Press the right button to commence");
+delay (7000);
+  if (M5.BtnC.read)
+      {
+        break;
+      }
+     }
+
 //End of chaos 
 
 int i =0;
