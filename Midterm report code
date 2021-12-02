@@ -17,6 +17,33 @@ void setup() {
   M5.IMU.Init();  //Init IMU sensor.  初始化惯性传感器 
   DisplayInit();
   delay(100);
+ 
+ //Main Page
+ void loop{
+    M5.Lcd.fillCircle(160, 120, 100, color [i]);
+    i++;
+    if (i >=(sizeof(color) / sizeof(int)))
+      {
+       i=0;
+      }      
+     delay(2000);
+     }
+M5.Lcd.setTextSize(30);  
+  M5.Lcd.setTextColor(WHITE); //Set the text color to black.  
+  M5.Lcd.setCursor(40,29);
+M5.Lcd.printf("Fall Detection");
+M5.Lcd.drawLine(119, 90, 189, 90, WHITE)
+    delay(5000);
+  M5.Lcd.setTextSize(16);  . 
+  M5.Lcd.setTextColor(WHITE); //Set the text color to black.  
+  M5.Lcd.setCursor(0,200);
+M5.Lcd.printf("Prepare to begin concussion test to intiate baseline score");
+delay(5000)
+M5.Lcd.setTextSize(16);  . 
+  M5.Lcd.setTextColor(WHITE); //Set the text color to black.  
+  M5.Lcd.setCursor(0,222);
+M5.Lcd.printf("Please sit in a quiet environment to maximize accuracy");
+//End of chaos 
 
 int i =0;
 while (i<20)
@@ -180,6 +207,7 @@ TimeStruct.Hours   = 0;    //Set the specific time of the real-time clock struct
   TimeStruct.Seconds = 0;
   M5.Rtc.SetTime(&TimeStruct);
 
+TimeStruct.Seconds
    while(!M5.BtnC.read() || !M5.BtnA.read()) {
    
          M5.Rtc.GetTime(&TimeStruct)
