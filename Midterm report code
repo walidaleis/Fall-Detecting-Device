@@ -17,7 +17,9 @@ void setup() {
   M5.IMU.Init();  //Init IMU sensor.  初始化惯性传感器 
   DisplayInit();
   delay(100);
- 
+ int i=0;
+ int color[]={
+ 0xfd79, 0xe8e4, 0xfbe4, 0xff80, 0x2589, 0x51d, 0x3a59, 0xa254, 0x7bef, 0xffff}; 
  //Main Page
  void loop{
     M5.Lcd.fillCircle(160, 120, 100, color [i]);
