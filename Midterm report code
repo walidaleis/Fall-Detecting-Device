@@ -37,7 +37,7 @@ void setup() {
   M5.Lcd.setTextColor(WHITE); //Set the text color to black.  
   M5.Lcd.setCursor(40,29);
   M5.Lcd.printf("Fall Detection");
-delay(5000);
+delay(2000);
   M5.Lcd.setTextSize(4);  . 
   M5.Lcd.setTextColor(WHITE); //Set the text color to black.  
   M5.Lcd.setCursor(0,200);
@@ -47,17 +47,17 @@ delay(5000)l
   M5.Lcd.setTextColor(WHITE); //Set the text color to black.  
   M5.Lcd.setCursor(0,222);
   M5.Lcd.printf("Please sit in a quiet environment to maximize accuracy");
-delay (7000);
+delay (5000);
   M5.Lcd.setTextSize(2);  . 
   M5.Lcd.setTextColor(WHITE); //Set the text color to black.  
   M5.Lcd.setCursor(250,208);
   M5.Lcd.printf("Press the right button to commence");
-delay (7000);
+delay (5000);
   if (M5.BtnC.read)
       {
         break;
       }
-     } while () 
+     } while (M5.BtnC.read) 
 
 //End of chaos 
 
