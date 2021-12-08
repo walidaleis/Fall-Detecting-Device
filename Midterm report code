@@ -25,7 +25,7 @@ void setup() {
 }; 
  //Main Page
  
- void loop{
+ void do{
     M5.Lcd.fillCircle(180, 140, 100, color [i]);
     i++;
     if (i >=(sizeof(color) / sizeof(int)))
@@ -57,7 +57,7 @@ delay (7000);
       {
         break;
       }
-     }
+     } while () 
 
 //End of chaos 
 
