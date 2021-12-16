@@ -1,5 +1,6 @@
 # Fall-Detector-Term-Project
-Description
+Authors: Walid Al-Eisawi, Firas Darwish, Hamdan Zoghbor
+Description: 
 This source code has been designed for the M5Stack Core2 using Arduino in C++, to develop a fall-detecting device known as the "Guardian Angel". 
 The device, which is equipped with an accelerometer and built-in WiFi module, makes use of these to detect when the user has fallen.
 By implementing a variety of functions, the source code shown here prints out a title screen on the display, followed by multiple functions. 
@@ -70,6 +71,20 @@ It is concerned with how Edge Impulse classifies the audio input.
 Whether or not the user is able to respond within the time limit given for them to provide their audio, the classifier will try and determine if the user indicated yes/no. 
 This may lead to situations where the user does not respond at all yet the classifier picks up noise that it assumes is responding with “yes” to “are you okay?”. 
 This leads to a persistent problem where the user may be incapable of receiving medical help or attention once they’ve taken a fall.
+
+
+What we would have done differently:
+Alter concussion test to accommodate for color-blind users
+One element that can considerably enhance the device is the inclusion of additional baseline examinations that can aid every individual uniquely. For instance, we need to consider colorblind individuals, which influences roughly 300 million individuals. We would incorporate more tests like "reaction speed" or "recollection" reevaluations in the future. As indicated in the figure below, there are three types of questions/tests that are frequently in use in cognitive/concussion tests: symbol matching, design memory, and color match. By providing sample concussion tests that fall under the category of symbol matching and design memory, we may be able to create a more holistic device that takes into account the visual impairments suffered by users. At the same time, some of these tests could be expanded to the auditory field for blind users who may not be able to navigate the visual interface as easily–or at all. The only concern is the physical impediments of the M5 Stack Core 2. The device has an undersized  300-pixel screen and can only display primary colors within its LED lights. However, acquiring or cultivating a more evolved technological gadget would include the aforementioned improvements.
+
+
+Incorporate GPS functionality to alert emergency contact of the user’s location as well after taking a fall
+As previously forecasted in the above paragraph, the inclusion of some GPS trackers can significantly improve the functional application of the "Guardian Angel." We would implement these GPS trackers over IP addresses as they are communed to a series of satellites to define a precise location. We would employ the M5stack ATOM GPS Kit M8030-KT which uses an approach anointed ‘trilateration’ that operates the assignment of satellites from the Global Navigation Satellite System Network and computes their exact distance to define longitude, latitude, elevation, and time.
+Add touch-screen buttons for more user-friendly interface
+Moreover, we would need to add the functionality of a touch screen, which might yield it to be more user-friendly for some. This is necessary to consider since the target users are less technologically literate and might require some nominal practices to get accustomed to the new commands. 
+This watch emulates a fall detecting watch well but is nowhere near a usable, marketable device that can be launched to the general public. In its current state, one needs to Connect mini-keyboard for M5Stack to permit the user to input their mandated contact information, API key, WiFi SSID, and password. And also better acclimate the code to entitle Wi-Fi information to be modified after set-up, rather than having the user reset the device when switching networks. This will overall make the device more dynamic and less static in nature.
+
+Multi-Language Interface: This device’s universality is marred by the fact its voice detection system can only recognize responses provided in the English language. Osteoporosis does not discriminate and, thus, we would hope to create several embedded machine learning algorithms that can take into account the multiplicity of languages that exist in today’s world.
 
 
 If you would like to create your own voice recognition software, you may do so using the following:
