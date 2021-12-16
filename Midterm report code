@@ -1,283 +1,692 @@
+#include <jvillegas-project-1_inferencing.h>
+//#include <Test4_inferencing.h>
 #include <M5Core2.h>
+#include <WiFi.h>         //Including wifi.h library  will take care of all wifi related tasks
+#include <HTTPClient.h>   //Including HTTPClient.h library to use all api
+#define EIDSP_QUANTIZE_FILTERBANK   0
+#include <driver/i2s.h> //Include libraries required for voice recognition
+#define CONFIG_I2S_BCK_PIN 12
+#define CONFIG_I2S_LRCK_PIN 0
+#define CONFIG_I2S_DATA_PIN 2
+#define CONFIG_I2S_DATA_IN_PIN 34
 
-#include <math.h> //library in place of cmath
+#define Speak_I2S_NUMBER I2S_NUM_0
 
-int count = 0;
+#define MODE_MIC 0
+#define MODE_SPK 1
+#define DATA_SIZE 1024
 
-void DisplayInit(void){ // Initialize the display. 
-  M5.Lcd.fillScreen(BLUE); //Set the screen background color to white.  
-  M5.Lcd.setTextColor(BLACK); //Set the text color to black.  
+int data_offset = 0;
+int score = 0;                         //Declare and initialize variable for baseline cognitive ability score
+int score2 = 0;                        //Declare and initialize variable for new cognitive ability score after fall
+const char* ssid = "";             //Add WiFi ssid
+const char* password =  "";    //Add WiFi password
+
+//Struct and variables required for voice recognition
+typedef struct {
+    int16_t *buffer;
+    uint8_t buf_ready;
+    uint32_t buf_count;
+    uint32_t n_samples;
+} inference_t;
+
+static inference_t inference;
+static signed short sampleBuffer[2048];
+static bool debug_nn = false; 
+
+String apiKey = "827522";              //apiKey that is sent to user when setting up online WhatsApp bot
+String phone_number = "+971501840085"; //Phone number of emergency contact
+String url; //url String will be used to store the final generated URL
+bool flag1 = false; //Used to keep track of algorithm
+bool flag2 = false;
+
+void DisplayInit(void){ // Initializes the display.
+M5.Lcd.fillScreen(BLUE);  
+M5.Lcd.setTextColor(BLACK); 
 }
 
-RTC_TimeTypeDef TimeStruct;
+RTC_TimeTypeDef TimeStruct; //Initializes real-time clock (RTC)
 
 void setup() {
 
-  M5.begin(true, true, true, true); //Init M5Core2. 
-  M5.IMU.Init();  //Init IMU sensor.  初始化惯性传感器 
+  M5.begin(true, true, true, true); //Initiates M5Core2.
+  WiFi.begin(ssid, password);              // Tries to connect with the given SSID and PSS
+  M5.Lcd.print("\nConnecting Wifi...\n");
+  while (WiFi.status() != WL_CONNECTED) {  // Waits until WiFi is connected
+    delay(500);
+    M5.Lcd.print("[HTTP] begin...\n");
+  }
+  M5.Lcd.print("Success!"); //Prints message to confirm successful connection
+  M5.IMU.Init();  //Initiates IMU sensor for accelerometer
+  M5.Axp.SetSpkEnable(true);
   DisplayInit();
   delay(100);
-  
-  //0xfd79, 0xe8e4, 0xfbe4, 0xff80, 0x2589, 0x51d, 0x3a59, 0xa254, 0x7bef, 0xffff
- int i=0;
+
+int j=0;
  int color[]={ 
-#020d14,#051c2b, #072b42, #0a3a59, #0d4970, #0f5887, #12679e, 0x51d, 0x3a59 
-}; 
- //Main Page
- 
- void do{
-    M5.Lcd.fillCircle(180, 140, 100, color [i]);
-    i++;
-    if (i >=(sizeof(color) / sizeof(int)))
+0x51d, 0x3a59, 0xfd79, 0xe8e4, 0xfbe4
+};  //int value of colors
+
+ //Main Page setup
+    M5.Lcd.fillCircle(140, 140, 100, color [j]);
+    j++;
+    if (j >=(sizeof(color) / sizeof(int)))
       {
-       i=0;
+       j=0;
       }      
      delay(1000);
-     M5.Lcd.setTextSize(16);  
+     M5.Lcd.setTextSize(3);  
   M5.Lcd.setTextColor(WHITE); //Set the text color to black.  
   M5.Lcd.setCursor(40,29);
   M5.Lcd.printf("Fall Detection");
 delay(2000);
-  M5.Lcd.setTextSize(4);  . 
+  M5.Lcd.setTextSize(2); 
   M5.Lcd.setTextColor(WHITE); //Set the text color to black.  
-  M5.Lcd.setCursor(0,200);
+  M5.Lcd.setCursor(0,100);
   M5.Lcd.printf("Prepare to begin concussion test to intiate baseline score");
-delay(5000)l
-  M5.Lcd.setTextSize(4);  . 
+delay(4000);
+  M5.Lcd.setTextSize(2);  
   M5.Lcd.setTextColor(WHITE); //Set the text color to black.  
-  M5.Lcd.setCursor(0,222);
+  M5.Lcd.setCursor(0,152);
   M5.Lcd.printf("Please sit in a quiet environment to maximize accuracy");
-delay (5000);
-  M5.Lcd.setTextSize(2);  . 
-  M5.Lcd.setTextColor(WHITE); //Set the text color to black.  
-  M5.Lcd.setCursor(250,208);
-  M5.Lcd.printf("Press the right button to commence");
-delay (5000);
-  if (M5.BtnC.read)
-      {
-        break;
-      }
-     } while (M5.BtnC.read) 
 
-//End of chaos 
+delay(10000);
+M5.Lcd.fillScreen(BLACK);
+M5.Lcd.setTextColor(WHITE);
+M5.Lcd.setCursor(0,100);
+//Begin countdown
+M5.Lcd.printf("Beginning in 5...");
+delay(1000);
+M5.Lcd.fillScreen(BLACK);
+M5.Lcd.setCursor(0,100);
+M5.Lcd.printf("Beginning in 4...");
+delay(1000);
+M5.Lcd.fillScreen(BLACK);
+M5.Lcd.setCursor(0,100);
+M5.Lcd.printf("Beginning in 3...");
+delay(1000);
+M5.Lcd.fillScreen(BLACK);
+M5.Lcd.setCursor(0,100);
+M5.Lcd.printf("Beginning in 2...");
+delay(1000);
+M5.Lcd.fillScreen(BLACK);
+M5.Lcd.setCursor(0,100);
+M5.Lcd.printf("Beginning in 1...");
+delay(1000);
 
-int i =0;
-while (i<20)
-{
+ M5.Lcd.fillScreen(WHITE);  
+M5.Lcd.setTextColor(BLACK);
+ M5.Lcd.printf("Initiating baseline concussion test");
+ delay(5000);
+ 
+  score = impactTest(); //Calls concussion test for baseline and assign to score
+  M5.Lcd.fillScreen(WHITE);
+  M5.Lcd.setTextSize(10);
+  M5.Lcd.setCursor(145,113);
+  M5.Lcd.print(score); //Ensures user is aware of their initial score
+  delay(5000);
+  M5.Lcd.fillScreen(WHITE);
 
- M5.Lcd.fillScreen(WHITE);
-    delay(500);
-  M5.Lcd.setTextSize(2);  //Set font size to 1. 
-  M5.Lcd.setTextColor(BLACK); //Set the text color to black.  
-  M5.Lcd.setCursor(60,110);
-M5.Lcd.printf("Does the font color");
-  M5.Lcd.setCursor(30,126);
-  M5.Lcd.printf("match the color written?");
-  M5.Lcd.setCursor(56,173);
-  M5.Lcd.printf("Left Button for Yes");
-  M5.Lcd.setCursor(54,193);
-  M5.Lcd.printf("Right Button for No");
-
-M5.Lcd.setTextSize(48);
-M5.Lcd.setCursor(74, 51);
-
-randomSeed(3);
-
-int font = random(1, 4);
-
-if (font == 1)
-  {
-    M5.Lcd.setTextColor(RED);
-  }
-
-if (font == 2)
-  {
-    M5.Lcd.setTextColor(BLUE);
-  }
-
-if (font == 3)
-  {
-    M5.Lcd.setTextColor(GREEN);
-  }
-
-int text = random(1,3);
-
-if (text == 1)
-  {
-    M5.Lcd.printf("Red");
-  }
-
-if (text == 2)
-
-  {
-    M5.Lcd.printf("Blue");
-  }
-
-if (text == 3)
-
-  {
-    M5.Lcd.printf("Green");
-  }
-
-// delay(3000);
-M5.update();
-
-while(!M5.BtnC.read() || !M5.BtnA.read())
-{
-   M5.update();
-   if (M5.BtnA.read())
-  {
-
-    if(font == text)
-      {
-
-      count++;
-      break;
-      }
-
-      if(font != text)
-      {
-        break;
-      }
-  }
-
-  if(M5.BtnC.read())
-  {
-
-    if(font != text)
-
-    {
-
-    count++;
-   break;
-
+ //Check if audio sampling is functional
+    if (microphone_inference_start(EI_CLASSIFIER_RAW_SAMPLE_COUNT) == false) {
+        M5.Lcd.printf("ERR: Failed to setup audio sampling\r\n");
+        return;
+            delay(3000);
     }
-
-    if(font == text)
-    {
-      break;
-    }
-
-  }
-
 }
-//M5.Lcd.setCursor(145,113);
-// M5.Lcd.print(i);
- i++;
-}
-
-M5.Lcd.fillScreen(WHITE);
-
-}
-
-
-
-/* After the program in setup() runs, it runs the program in loop()
-
-The loop() function is an infinite loop in which the program runs repeatedly
-
-*/
 
 void loop() {
-
+  flag2 = false;
   M5.Lcd.setCursor(145,113);
-
-    M5.update();
-
-  float acc, accX, accY, accZ; //Define variables for acceleration
-
-   M5.Lcd.setTextColor(BLACK); //Set the font color
-
-    M5.Lcd.setTextSize(0.5);  //Set the font size.  
-
+  M5.update();
+  float acc, accX, accY, accZ; //Defines variables for acceleration
+  M5.Lcd.setTextColor(BLACK);
+  M5.Lcd.setTextSize(2);
   M5.IMU.getAccelData(&accX,&accY,&accZ); //Stores the triaxial accelerometer and retrieves data  
 
-     bool flag1 = false; //flag might be unnecessary, condition can just be acc
+  flag1 = false; //Used to keep track of algorithm
+  acc = sqrt(pow(accX,2) + pow(accY,2) + pow(accZ,2)); //Computes magnitude of acceleration
+  if (acc>=6.0) { //Checks if fall condition and call mechanism if condition met
 
-     acc = sqrt(pow(accX,2) + pow(accY,2) + pow(accZ,2)); //Computes magnitude of acceleration
-
-
-    //Check fall condition and call mechanism if condition met
-
-    if (acc>=6.0) {
-
-      M5.Lcd.setCursor(10, 10); //Specify where to print on screen
-
-      M5.Lcd.printf("Suspected Fall, are you ok?"); //Check if user is okay
-
-      M5.Lcd.setCursor(10, 26); //Move cursor to line below
-
-      M5.Lcd.printf("Press the appropriate button"); //
-
-      flag1 = true;
+      M5.Lcd.setCursor(10, 10);
+      M5.Lcd.printf("Suspected Fall, are you ok?"); //Checks if user is okay
+      M5.Lcd.setCursor(10, 26);
+      M5.Lcd.printf("Press the appropriate button"); //Prompts user response to indicate state
+      flag1 = true; //Sets flag to true to proceed to following code block
 
     }
 
-
 if (flag1 == true)
-
 {
-
-TimeStruct.Hours   = 0;    //Set the specific time of the real-time clock structure.
+  TimeStruct.Hours   = 0;    //Sets the specific time of the real-time clock structure.
   TimeStruct.Minutes = 0;
   TimeStruct.Seconds = 0;
   M5.Rtc.SetTime(&TimeStruct);
 
-TimeStruct.Seconds
+
    while(!M5.BtnC.read() || !M5.BtnA.read()) {
-   
-         M5.Rtc.GetTime(&TimeStruct)
-         if (TimeStruct.Seconds <= 20)
+         M5.Rtc.GetTime(&TimeStruct);
+         if (TimeStruct.Seconds > 20) //check if no user response within 20 seconds
          {
+         isNotOkRec(); //call function to prompt user for verbal response
          break;
          }
 
-        
         M5.Axp.SetLDOEnable(3,true);  //Open the vibration.  
 
         delay(100);
 
         M5.Axp.SetLDOEnable(3,false);
-
-    
+   
         M5.update();
 
         if (M5.BtnA.read()) {
-
-        M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.  
-
-         M5.Lcd.setCursor(15, 30);
-
-      M5.Lcd.printf("You are okay");
-
-      delay(5000);
-
-        M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.
-
-        break;
-
+          // check if user has taken a fall first
+          flag2 = true;
+          break; //ADDED
                }        
 
         M5.update();
 
         if (M5.BtnC.read()) {
-
-         //send emergecy contact message
-
-           M5.Lcd.fillScreen(WHITE); //Set the screen background color to white.  
-
-              M5.Lcd.setCursor(15, 30);
-
-              M5.Lcd.printf("you are not okay");
-
-                    delay(5000);
-
-              M5.Lcd.fillScreen(WHITE); //Set the screen background color to white. 
-
-              break; 
-
+          isNotOk();
+              break;
                 }
    }
 flag1 = false;
 }
+
+if (flag2 == true)
+{
+   M5.Lcd.fillScreen(WHITE);
+          M5.Lcd.setTextSize(2);
+          M5.Lcd.setCursor(10,60);
+          //Check if fall detection was accurate
+          M5.Lcd.printf("Have you taken a fall?");
+          delay(500);
+     while(!M5.BtnC.read() || !M5.BtnA.read()) {
+{
+         
+          M5.update();
+          if (M5.BtnA.read()) {
+            isOk(); //user is ok if left button clicked
+            break;
           }
+          M5.update();
+          if (M5.BtnC.read()) {
+            M5.update();
+            M5.Lcd.fillScreen(WHITE);
+            M5.Lcd.printf("Apologies for the mishap!"); //mis-detection if right button clicked
+            M5.Lcd.setCursor(10,100);
+            M5.Lcd.printf("Returning to fall detection...");
+            delay(3000);
+            M5.Lcd.fillScreen(WHITE);
+            break;
+          }
+}
+
+          }
+
+}
+}
+
+void isNotOk() {
+M5.Lcd.fillScreen(WHITE);
+M5.Lcd.setTextColor(RED);
+M5.Lcd.setTextSize(2);
+M5.Lcd.setCursor(15,110);
+M5.Lcd.printf("Notifying emergency contact...");
+message_to_whatsapp1("One of your contacts seems to have taken a hard fall. Get them some help immediately!"); //notify emergency contact through whatsapp function
+delay(5000);
+M5.Lcd.setCursor(118,153);
+M5.Lcd.printf("Success.");
+delay(10000);
+M5.Lcd.fillScreen(WHITE);
+}
+
+void isNotOkRec()
+{
+  M5.Lcd.fillScreen(WHITE);
+M5.Lcd.setTextColor(RED);
+M5.Lcd.setTextSize(2);
+M5.Lcd.setCursor(15,110);
+M5.Lcd.printf("You seem unresponsive...will validate using voice recognition"); //only called after 20 seconds have passed without response from user
+delay(5000);
+//audio ping
+M5.Lcd.fillScreen(BLACK);
+M5.Lcd.setTextColor(WHITE);
+M5.Lcd.setCursor(0,50);
+//print message on the screen indicating user can respond verbally
+M5.Lcd.printf("Are you okay?");
+M5.Lcd.setCursor(0,100);
+M5.Lcd.printf("Recording in 5...");
+delay(1000);
+M5.Lcd.fillScreen(BLACK);
+M5.Lcd.setCursor(0,50);
+M5.Lcd.printf("Are you okay?");
+M5.Lcd.setCursor(0,100);
+M5.Lcd.printf("Recording in 4...");
+delay(1000);
+M5.Lcd.fillScreen(BLACK);
+M5.Lcd.setCursor(0,50);
+M5.Lcd.printf("Are you okay?");
+M5.Lcd.setCursor(0,100);
+M5.Lcd.printf("Recording in 3...");
+delay(1000);
+M5.Lcd.fillScreen(BLACK);
+M5.Lcd.setCursor(0,50);
+M5.Lcd.printf("Are you okay?");
+M5.Lcd.setCursor(0,100);
+M5.Lcd.printf("Recording in 2...");
+delay(1000);
+M5.Lcd.fillScreen(BLACK);
+M5.Lcd.setCursor(0,50);
+M5.Lcd.printf("Are you okay?");
+M5.Lcd.setCursor(0,100);
+M5.Lcd.printf("Recording in 1...");
+delay(1000);
+
+M5.Lcd.setTextColor(RED);
+     M5.Lcd.fillScreen(WHITE);
+    M5.Lcd.printf("Recording...\n");
+    delay(3000);
+
+M5.Lcd.fillScreen(WHITE);
+//Check verbal user response and compare to yes/no through EDGE Impulse classifier
+    bool m = InitI2SSpeakOrMic(MODE_MIC);
+
+    if (!m) {
+        M5.Lcd.printf("ERR: Failed to record audio...\n");
+            delay(3000);
+        return;
+    }
+
+    signal_t signal;
+    signal.total_length = EI_CLASSIFIER_RAW_SAMPLE_COUNT;
+    signal.get_data = &microphone_audio_signal_get_data;
+    ei_impulse_result_t result = { 0 };
+
+ M5.Lcd.fillScreen(WHITE);
+    EI_IMPULSE_ERROR r = run_classifier(&signal, &result, debug_nn);
+    if (r != EI_IMPULSE_OK) {
+        M5.Lcd.printf("ERR: Failed to run classifier (%d)\n", r); //print message if error arises from classifier
+        return;
+    } 
+
+size_t ix = 0;
+size_t ix2 = 1;
+M5.Lcd.fillScreen(BLACK);
+M5.Lcd.setCursor(0,50);
+M5.Lcd.setCursor(0,100);
+    delay(2000);
+    M5.Lcd.fillScreen(BLACK);
+    for (size_t ix = 0; ix < EI_CLASSIFIER_LABEL_COUNT; ix++) {
+        delay(2000);
+        M5.Lcd.fillScreen(BLACK);
+            delay(3000);
+    }
+
+//Compare probability of response being a yes with probability of no
+//Call appropriate corresponding function
+if (result.classification[ix].value >= result.classification[ix2].value) //if no is greater than yes (or if no is detected)
+{
+  isNotOk();
+}
+
+if (result.classification[ix].value < result.classification[ix2].value) //if no is greater than yes (or if no is detected)
+{
+  isOk();
+}
+
+    #if EI_CLASSIFIER_HAS_ANOMALY == 1
+    M5.Lcd.printf("    anomaly score: %.3f\n", result.anomaly);
+        delay(3000);
+    M5.Lcd.setCursor(10, 116);
+    M5.Lcd.printf("anomaly score: %.3f\n", result.anomaly);
+        delay(3000);
+#endif
+}
+
+void isOk() {
+  score2 = 0;
+  M5.Lcd.fillScreen(WHITE);
+  M5.Lcd.setTextColor(BLACK);
+  M5.Lcd.setTextSize(2);
+  M5.Lcd.setCursor(23,99);
+  //Repeat impact concussion test if user indicates they are ok
+  M5.Lcd.printf("You will now take a concussion test ");
+  M5.Lcd.setCursor(48,139);
+  M5.Lcd.printf("to verify your cognitive state");
+  delay(10000);
+  score2 = impactTest();
+  M5.Lcd.fillScreen(WHITE);
+  M5.Lcd.setTextSize(10);
+  M5.Lcd.setCursor(145,113);
+  M5.Lcd.print(score2);
+  delay(5000);
+    M5.Lcd.fillScreen(WHITE);
+    //User is likely not ok if new score is significantly lower than baseline score
+  if (score2<(score-2)) {
+    M5.Lcd.fillScreen(WHITE);
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setTextColor(RED);
+    M5.Lcd.setCursor(39,61);
+    M5.Lcd.printf("You may need additional ");
+    M5.Lcd.setCursor(71,84);
+    M5.Lcd.printf("medical attention");
+    message_to_whatsapp2("One of your contacts has suffered a fall but is ok. However, they failed a sample concussion test--medical attention may be needed.");
+    M5.Lcd.setCursor(18,154);
+    M5.Lcd.printf("Emergency contact notified");
+    delay(10000);
+    M5.Lcd.fillScreen(WHITE);
+  }
+  //Otherwise return to regular fall detection
+    if (score2>=(score-2)) {
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setTextColor(BLACK);
+    M5.Lcd.setCursor(51,93);
+    M5.Lcd.printf("Cognitive test verified");
+    M5.Lcd.setCursor(114,149);
+    M5.Lcd.printf("Stay safe!");
+    delay(10000);
+    M5.Lcd.fillScreen(WHITE);
+  }
+}
+
+void  message_to_whatsapp1(String message)       // user define function to send meassage to WhatsApp app
+{
+  //adding all number, your api key, your message into one complete url
+  url = "https://api.callmebot.com/whatsapp.php?phone=+971501840085&apikey=827522&text=One%20of%20your%20contacts%20seems%20to%20have%20taken%20a%20hard%20fall.%20Get%20them%20some%20help%20immediately%21";
+
+  postData(); // calling postData to run the above-generated url once so that you will receive a message.
+}
+
+void  message_to_whatsapp2(String message)       // user define function to send meassage to WhatsApp app
+{
+  //adding all number, your api key, your message into one complete url
+  url = "https://api.callmebot.com/whatsapp.php?phone=+971501840085&apikey=827522&text=One%20of%20your%20contacts%20has%20suffered%20a%20fall%20but%20is%20ok.%20However%2C%20they%20failed%20a%20sample%20concussion%20test--medical%20attention%20may%20be%20needed.";
+
+  postData(); // calling postData to run the above-generated url once so that you will receive a message.
+}
+
+void postData()     //userDefine function used to call api(POST data)
+{
+  int httpCode;     // variable used to get the responce http code after calling api
+  HTTPClient http;  // Declare object of class HTTPClient
+  http.begin(url);  // begin the HTTPClient object with generated url
+  httpCode = http.POST(url); // Finaly Post the URL with this function and it will store the http code
+  if (httpCode == 200)      // Check if the responce http code is 200
+  {
+    Serial.println("Sent ok."); // print message sent ok message
+  }
+  else                      // if response HTTP code is not 200 it means there is some error.
+  {
+    Serial.println("Error."); // print error message.
+  }
+  http.end();          // After calling API end the HTTP client object.
+}
+
+String urlencode(String str)  // Function used for encoding the url
+{
+    String encodedString="";
+    char c;
+    char code0;
+    char code1;
+    char code2;
+    for (int i =0; i < str.length(); i++){
+      c=str.charAt(i);
+      if (c == ' '){
+        encodedString+= '+';
+      } else if (isalnum(c)){
+        encodedString+=c;
+      } else{
+        code1=(c & 0xf)+'0';
+        if ((c & 0xf) >9){
+            code1=(c & 0xf) - 10 + 'A';
+        }
+        c=(c>>4)&0xf;
+        code0=c+'0';
+        if (c > 9){
+            code0=c - 10 + 'A';
+        }
+        code2='\0';
+        encodedString+='%';
+        encodedString+=code0;
+        encodedString+=code1;
+        //encodedString+=code2;
+      }
+      yield();
+    }
+    return encodedString;
+}
+
+int impactTest() {
+  int scoreNew;
+  scoreNew = 0;
+  int i =0;
+  while (i<20)
+  {
+ 
+   M5.Lcd.fillScreen(WHITE);
+      delay(500);
+    M5.Lcd.setTextSize(2);  //Set font size to 1.
+    M5.Lcd.setTextColor(BLACK); //Set the text color to black.  
+    M5.Lcd.setCursor(60,110);
+  M5.Lcd.printf("Does the font color");
+    M5.Lcd.setCursor(30,126);
+    M5.Lcd.printf("match the color written?");
+    M5.Lcd.setCursor(56,173);
+    M5.Lcd.printf("Left Button for Yes");
+    M5.Lcd.setCursor(54,193);
+    M5.Lcd.printf("Right Button for No");
+ 
+  M5.Lcd.setTextSize(48);
+  M5.Lcd.setCursor(74, 51);
+ 
+  randomSeed(3);
+
+  //Generate random number between 1 and 3 for font color and assign different color to each
+  int font = random(1, 3);
+ 
+  if (font == 1)
+    {
+      M5.Lcd.setTextColor(RED);
+    }
+ 
+  if (font == 2)
+    {
+      M5.Lcd.setTextColor(BLUE);
+    }
+ 
+  if (font == 3)
+    {
+      M5.Lcd.setTextColor(GREEN);
+    }
+
+ //Generate random number between 1 and 3 for font color word and compare this with previous number
+  int text = random(1,3);
+ 
+  if (text == 1)
+    {
+      M5.Lcd.printf("Red");
+    }
+ 
+  if (text == 2)
+ 
+    {
+      M5.Lcd.printf("Blue");
+    }
+ 
+  if (text == 3)
+ 
+    {
+      M5.Lcd.printf("Green");
+    }
+ 
+  // delay(3000);
+  M5.update();
+ 
+  while(!M5.BtnC.read() || !M5.BtnA.read())
+  {
+     M5.update();
+     
+     if (M5.BtnA.read())
+    {
+ 
+      if(font == text)
+        {
+ 
+        scoreNew++; //increment score when user gets answer correct
+        break;
+        }
+ 
+        if(font != text)
+        {
+          break;
+        }
+    }
+ 
+    if(M5.BtnC.read())
+    {
+ 
+      if(font != text)
+ 
+      {
+ 
+      scoreNew++; //increment score when user gets answer correct
+     break;
+ 
+      }
+ 
+      if(font == text)
+      {
+        break;
+      }
+ 
+    }
+ 
+  }
+   i++;
+  }
+ 
+  M5.Lcd.fillScreen(WHITE);
+
+  return scoreNew;
+}
+
+//Functions for initiating speaker and microphone classifier
+bool InitI2SSpeakOrMic(int mode)
+{
+    esp_err_t err = ESP_OK;
+    i2s_driver_uninstall(Speak_I2S_NUMBER);
+    i2s_config_t i2s_config = {
+        .mode = (i2s_mode_t)(I2S_MODE_MASTER),
+        .sample_rate = 44100,
+        .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT, // is fixed at 12bit, stereo, MSB
+        .channel_format = I2S_CHANNEL_FMT_ONLY_RIGHT,
+        .communication_format = I2S_COMM_FORMAT_I2S,
+        .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
+        .dma_buf_count = 2,
+        .dma_buf_len = 128,
+    };
+    if (mode == MODE_MIC)
+    {
+        i2s_config.mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX | I2S_MODE_PDM);
+    }
+    else
+    {
+        i2s_config.mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX);
+        i2s_config.use_apll = false;
+        i2s_config.tx_desc_auto_clear = true;
+    }
+    err += i2s_driver_install(Speak_I2S_NUMBER, &i2s_config, 0, NULL);
+    i2s_pin_config_t tx_pin_config;
+    tx_pin_config.bck_io_num = CONFIG_I2S_BCK_PIN;
+    tx_pin_config.ws_io_num = CONFIG_I2S_LRCK_PIN;
+    tx_pin_config.data_out_num = CONFIG_I2S_DATA_PIN;
+    tx_pin_config.data_in_num = CONFIG_I2S_DATA_IN_PIN;
+    err += i2s_set_pin(Speak_I2S_NUMBER, &tx_pin_config);
+    err += i2s_set_clk(Speak_I2S_NUMBER, 44100, I2S_BITS_PER_SAMPLE_16BIT, I2S_CHANNEL_MONO);
+    return true;
+}
+
+static bool microphone_inference_start(uint32_t n_samples)
+{
+    inference.buffer = (int16_t *)malloc(n_samples * sizeof(int16_t));
+
+    if(inference.buffer == NULL) {
+        return false;
+    }
+
+    inference.buf_count  = 0;
+    inference.n_samples  = n_samples;
+    inference.buf_ready  = 0;
+ 
+    return true;
+}
+
+
+
+static void pdm_data_ready_inference_callback(void)
+{
+   
+    // read into the sample buffer
+    size_t bytesRead;
+    i2s_read(Speak_I2S_NUMBER, (char *)(sampleBuffer), DATA_SIZE, &bytesRead, (100 / portTICK_RATE_MS));
+
+    if (inference.buf_ready == 0) {
+        for(int i = 0; i < bytesRead>>1; i++) {
+            inference.buffer[inference.buf_count++] = sampleBuffer[i];
+
+            if(inference.buf_count >= inference.n_samples) {
+                inference.buf_count = 0;
+                inference.buf_ready = 1;
+                break;
+            }
+        }
+    }
+}
+
+
+static void microphone_inference_end(void)
+{
+   
+    free(inference.buffer);
+}
+
+static bool microphone_inference_record(void)
+{
+    inference.buf_ready = 0;
+    inference.buf_count = 0;
+
+    while(inference.buf_ready == 0) {        
+       
+        pdm_data_ready_inference_callback();
+    }
+
+    inference.buf_ready = 0;
+    return true;
+}
+
+static int microphone_audio_signal_get_data(size_t offset, size_t length, float *out_ptr)
+{
+    numpy::int16_to_float(sampleBuffer+offset, out_ptr, length); //changed to sampleBuffer + offset
+
+    return 0;
+}
+
+void buffer_is_full() { //potential grouping
+    signal_t signal;
+    signal.total_length = EI_CLASSIFIER_RAW_SAMPLE_COUNT;
+    signal.get_data = &microphone_audio_signal_get_data;
+    ei_impulse_result_t result = { 0 };
+
+    EI_IMPULSE_ERROR r = run_classifier(&signal, &result, debug_nn);
+    if (r != EI_IMPULSE_OK) {
+        ei_printf("ERR: Failed to run classifier (%d)\n", r);
+        return;
+    }
+}
+#if !defined(EI_CLASSIFIER_SENSOR) || EI_CLASSIFIER_SENSOR != EI_CLASSIFIER_SENSOR_MICROPHONE
+#error "Invalid model for current sensor."
+#endif
