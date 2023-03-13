@@ -11,21 +11,20 @@ Other than verbal response, the code also provides the user with the option to m
 If the device detects a fall and the user indicates they are not okay, a function is called to cue a WhatsApp message to be sent through Wi-Fi to an emergency contact.
 The user's emergency contact and Wi-Fi information must be hardcoded due to challenges with written user input on the M5Stack Core 2 Display.
 
-How to Install and Run the Project
+## How to Install and Run the Project
 
 Make sure to download the library included in this GitHub page initially as well as the M5Core2 Library from Arduino.
 These libraries are required for the code to operate. 
 The code can then be compiled on Arduino.
 
-How to Use the Project
+## How to Use the Project
 
 An M5Stack Core 2 is needed for the project, as the syntax is specific to this device.
 The user will need to hardcode their WiFi information and emergency contact number, as well as the API key that will be sent to their emergency contact as they set this up.
 Simply replace current emergency contact information with your respective emergency contact info.
 After this, the code can be compiled onto the device through Arduino and the device can be used as a fall-detecting device, perhaps with a shoulder strap to enhance accuracy.
 
-
-Challenges and errors faced with the project:
+## Challenges and errors faced with the project:
 
 One of the most significant errors we faced was attempting to reconcile the example codes we had employing the M5’s microphone to store audio inputs (and the functions associated with doing so) with the integrated functions associated with the EdgeImpulse voice recognition library.  
 A critical part of our debugging process consisted of referring to various forums (whether the M5’s or EdgeImpulse’s respective library). 
@@ -82,23 +81,25 @@ This may lead to situations where the user does not respond at all yet the class
 This leads to a persistent problem where the user may be incapable of receiving medical help or attention once they’ve taken a fall.
 
 
-What we would have done differently:
+## What we would have done differently:
 
-Alter concussion test to accommodate for color-blind users
+### Alter concussion test to accommodate for color-blind users
 
 One element that can considerably enhance the device is the inclusion of additional baseline examinations that can aid every individual uniquely. For instance, we need to consider colorblind individuals, which influences roughly 300 million individuals. We would incorporate more tests like "reaction speed" or "recollection" reevaluations in the future. As indicated in the figure below, there are three types of questions/tests that are frequently in use in cognitive/concussion tests: symbol matching, design memory, and color match. By providing sample concussion tests that fall under the category of symbol matching and design memory, we may be able to create a more holistic device that takes into account the visual impairments suffered by users. At the same time, some of these tests could be expanded to the auditory field for blind users who may not be able to navigate the visual interface as easily–or at all. The only concern is the physical impediments of the M5 Stack Core 2. The device has an undersized  300-pixel screen and can only display primary colors within its LED lights. However, acquiring or cultivating a more evolved technological gadget would include the aforementioned improvements.
 
 
-Incorporate GPS functionality to alert emergency contact of the user’s location as well after taking a fall
+### Incorporate GPS functionality to alert emergency contact of the user’s location as well after taking a fall
 
 As previously forecasted in the above paragraph, the inclusion of some GPS trackers can significantly improve the functional application of the "Guardian Angel." We would implement these GPS trackers over IP addresses as they are communed to a series of satellites to define a precise location. We would employ the M5stack ATOM GPS Kit M8030-KT which uses an approach anointed ‘trilateration’ that operates the assignment of satellites from the Global Navigation Satellite System Network and computes their exact distance to define longitude, latitude, elevation, and time.
 
-Add touch-screen buttons for more user-friendly interface
+### Add touch-screen buttons for more user-friendly interface
 
 Moreover, we would need to add the functionality of a touch screen, which might yield it to be more user-friendly for some. This is necessary to consider since the target users are less technologically literate and might require some nominal practices to get accustomed to the new commands. 
 This watch emulates a fall detecting watch well but is nowhere near a usable, marketable device that can be launched to the general public. In its current state, one needs to Connect mini-keyboard for M5Stack to permit the user to input their mandated contact information, API key, WiFi SSID, and password. And also better acclimate the code to entitle Wi-Fi information to be modified after set-up, rather than having the user reset the device when switching networks. This will overall make the device more dynamic and less static in nature.
 
-Multi-Language Interface: This device’s universality is marred by the fact its voice detection system can only recognize responses provided in the English language. Osteoporosis does not discriminate and, thus, we would hope to create several embedded machine learning algorithms that can take into account the multiplicity of languages that exist in today’s world.
+### Add Multi-Language Interface
+
+This device’s universality is marred by the fact its voice detection system can only recognize responses provided in the English language. Osteoporosis does not discriminate and, thus, we would hope to create several embedded machine learning algorithms that can take into account the multiplicity of languages that exist in today’s world.
 
 
 If you would like to create your own voice recognition software, you may do so using the following:
