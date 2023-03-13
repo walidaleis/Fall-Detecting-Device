@@ -1,7 +1,7 @@
 # Fall-Detector-Term-Project
 Authors: Walid Al-Eisawi, Firas Darwish, Hamdan Zoghbor
 
-Description: 
+## Description: 
 
 This source code has been designed for the M5Stack Core2 using Arduino in C++, to develop a fall-detecting device known as the "Guardian Angel". 
 The device, which is equipped with an accelerometer and built-in WiFi module, makes use of these to detect when the user has fallen.
